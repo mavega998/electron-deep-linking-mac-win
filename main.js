@@ -24,7 +24,7 @@ if (gotTheLock) {
       deeplinkingUrl = argv.slice(1)
     }
     logEverywhere('app.makeSingleInstance# ' + deeplinkingUrl)
-
+    app.url = deeplinkingUrl
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore()
       mainWindow.focus()
@@ -38,24 +38,51 @@ if (gotTheLock) {
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 980,
+    height: 760,
+    frame: true,
     webPreferences: {
-      nodeIntegration: true
-    }
+      nodeIntegration: true,
+    },
   })
+  // child = new BrowserWindow({
+  //   parent: mainWindow,
+  //   frame: true,
+  //   width: 300,
+  //   height: 760,
+  //   webPreferences: {
+  //     nodeIntegration: true,
+  //   },
+  // })
 
-  // and load the index.html of the app.
+  //Load url or files
   mainWindow.loadURL(
     url.format({
-      pathname: path.join(__dirname, 'index.html'),
+      pathname: path.join(__dirname, './public/index.html'),
       protocol: 'file:',
-      slashes: true
+      slashes: true,
     })
   )
+  // child.loadURL(
+  //   url.format({
+  //     pathname: path.join(__dirname, './public/index.html/controls'),
+  //     protocol: 'file:',
+  //     slashes: true,
+  //   })
+  // )
+
+  // Hide menubar
+  mainWindow.setMenuBarVisibility(false)
+  // child.setMenuBarVisibility(false)
+
+  
+  // child.once('ready-to-show', () => {
+  //   // child.show()
+  // })  
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
+  // child.webContents.openDevTools()
 
   // Protocol handler for win32
   if (process.platform == 'win32') {
@@ -63,14 +90,17 @@ function createWindow() {
     deeplinkingUrl = process.argv.slice(1)
   }
   logEverywhere('createWindow# ' + deeplinkingUrl)
-
+  app.url = deeplinkingUrl
   // Emitted when the window is closed.
-  mainWindow.on('closed', function() {
+  mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
     mainWindow = null
   })
+
+  mainWindow.setPosition(10, 10)
+  // child.setPosition(990, 10)
 }
 
 // This method will be called when Electron has finished
@@ -79,7 +109,7 @@ function createWindow() {
 app.on('ready', createWindow)
 
 // Quit when all windows are closed.
-app.on('window-all-closed', function() {
+app.on('window-all-closed', function () {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
@@ -87,7 +117,7 @@ app.on('window-all-closed', function() {
   }
 })
 
-app.on('activate', function() {
+app.on('activate', function () {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
@@ -100,12 +130,13 @@ if (!app.isDefaultProtocolClient('myapp')) {
   app.setAsDefaultProtocolClient('myapp')
 }
 
-app.on('will-finish-launching', function() {
+app.on('will-finish-launching', function () {
   // Protocol handler for osx
-  app.on('open-url', function(event, url) {
+  app.on('open-url', function (event, url) {
     event.preventDefault()
     deeplinkingUrl = url
     logEverywhere('open-url# ' + deeplinkingUrl)
+    app.url = deeplinkingUrl
   })
 })
 
